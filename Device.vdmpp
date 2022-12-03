@@ -1,0 +1,12 @@
+class Device is subclass of GLOBAL
+    instance variables
+        deviceId: token;
+        static idCounter: int := 0; 
+    operations
+    public Device: () ==> Device
+        Device() == (deviceId := mk_token(deviceId);
+        idCounter := idCounter + 1);
+
+    public pure GetToken: () ==> token
+        GetToken() == return deviceId;
+end Device 

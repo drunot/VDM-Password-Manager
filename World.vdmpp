@@ -1,0 +1,13 @@
+class World
+instance variables
+    public static env: [Environment]:= nil;
+operations
+    public World :()==>World
+    World() ==
+    env := new Environment();
+
+    public Run :()==>()
+    Run() ==
+    (env.Run(););
+end World
+    

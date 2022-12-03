@@ -1,0 +1,17 @@
+class Time is subclass of GLOBAL
+    instance variables
+        currentTime: Seconds := 0;
+        updateObjects: seq of TimeObject := [];
+    operations
+        public TickTime: Seconds ==> ()
+        TickTime(amout) == (currentTime := currentTime + amout;
+            for all i in set inds updateObjects do
+                updateObjects(i).TimeTicked(currentTime);
+        );
+
+        public Register: TimeObject ==> ()
+        Register(obj) == updateObjects := updateObjects ^ [obj];
+
+        public GetCurrentTime: () ==> Seconds
+        GetCurrentTime() == return currentTime;
+end Time

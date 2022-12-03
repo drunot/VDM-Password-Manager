@@ -1,0 +1,5 @@
+class UserDatabase
+instance variables
+    users: seq of AccessManager;
+
+end UserDatabase

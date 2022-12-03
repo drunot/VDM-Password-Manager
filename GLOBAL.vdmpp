@@ -1,0 +1,19 @@
+class GLOBAL
+types
+    public String = seq of char;
+
+    public Seconds = nat;
+
+    public Device_t = Device
+        eq a = b == a.GetToken() = b.GetToken();
+    
+    public Password_t = Password
+        eq a = b == Password`PasswordCompaire(a,b);
+
+    public EncryptionKey_t = EncryptionKey
+        eq a = b == a.GetToken() = b.GetToken();
+
+    public OptEncryptionKey = [EncryptionKey_t]
+        eq a = b == if a = nil or b = nil then a = nil and b = nil else (a.GetToken() = b.GetToken());
+
+end GLOBAL

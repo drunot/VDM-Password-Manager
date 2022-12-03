@@ -1,0 +1,48 @@
+class AccessManager is subclass of TimeObject
+    instance variables
+        user: User;
+        database: Database := new Database();
+        acceptedDevices: set of Device := {};
+        encKey: [EncryptionKey] := nil;
+        lastActiveTime: Seconds := 0;
+        curTime: Seconds := 0;
+        static timeout: Seconds := 60 * 5;
+    inv encKey <> nil => lastActiveTime + timeout <= curTime; 
+operations
+
+    public AccessManager: User * Time ==> AccessManager
+    AccessManager(theUser, time) == (user := theUser;
+        time.Register(self));
+
+    Login: String * Device ==> bool
+    Login(password, dev) == (
+        if dev in set acceptedDevices then
+        let pass = new Password(password) in
+        (
+            if user.IsCorrectPassword(pass) then
+                let ek = user.GetEncryptionKey(pass) in
+                (database.Unlock(ek);
+                encKey := ek;
+                return true)
+                
+        );
+        return false
+    );
+
+    Logout: () ==> ()
+    Logout() == (database.Lock(encKey);encKey:=nil);
+
+    public TimeTicked: Seconds ==> ()
+    TimeTicked(currentTime) == (
+        if encKey <> nil and lastActiveTime + timeout <= currentTime then
+            Logout();
+        curTime := currentTime
+    );
+
+    public DoActivity: () ==> ()
+    DoActivity() == lastActiveTime := curTime;
+
+    public pure GetUserName: () ==> String
+    GetUserName() == return user.GetUsername();
+    
+end AccessManager

@@ -1,0 +1,56 @@
+class TestTimeObject is subclass of TimeObject
+-- Helper class for time tests --
+instance variables
+    currentTime: Seconds;
+    expireTime: Seconds;
+    timeExired: bool := false;
+
+operations
+    public TestTimeObject: Time * Seconds ==> TestTimeObject
+        TestTimeObject(time, seconds) == (
+            currentTime := time.GetCurrentTime();
+            expireTime := currentTime + seconds;
+            time.Register(self));
+
+    public TimeTicked: Seconds ==> ()
+    TimeTicked(curTime) == 
+        (currentTime := curTime;
+         if curTime >= expireTime then
+            timeExired := true;);
+
+    public GetExpired: () ==> bool
+        GetExpired() == return timeExired;
+
+end TestTimeObject
+
+class TestTime is subclass of TEST
+instance variables
+    time: Time := new Time();
+traces
+    TestTickTime:
+        let secs1 in set {20,30,40,50,12,1,302} in
+                let secs2 in set {20,30,40,50,12,1,302} in
+                    -- Tick once --
+                    (time.TickTime(secs1);
+                    assert([time.GetCurrentTime()], [secs1]);
+                    -- Tick twice --
+                    ( time.TickTime(secs2);
+                    assert([time.GetCurrentTime()], [secs1+secs2])));
+    TestTimeObject:
+        let testObjs in set {mk_(new TestTimeObject(time, 100), 40, 40, false, false),
+                            mk_(new TestTimeObject(time, 100), 40, 80, false, true),
+                            mk_(new TestTimeObject(time, 100), 100, 80, true, true),
+                            mk_(new TestTimeObject(time, 42), 40, 2, false, true),
+                            mk_(new TestTimeObject(time, 42), 44, 80, true, true),
+                            mk_(new TestTimeObject(time, 42), 1, 40, false, false)} in
+              (
+                -- Register is normaly done in the constructer of TestTimeObject
+                -- But it seams like the set for the test is created once, and that
+                -- time is reset for each test therefore it is done here manually.
+                time.Register(testObjs.#1); 
+                time.TickTime(testObjs.#2);
+                assert([BoolToNat(testObjs.#1.GetExpired())], [BoolToNat(testObjs.#4)]);
+                time.TickTime(testObjs.#3);
+                assert([BoolToNat(testObjs.#1.GetExpired())], [BoolToNat(testObjs.#5)]);
+              );       
+end TestTime

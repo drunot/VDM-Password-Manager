@@ -1,0 +1,9 @@
+class TEST is subclass of GLOBAL
+    instance variables
+    protected static BoolToNat: map bool to int := {true |-> 1, false |-> 0};
+operations
+    protected assert: seq1 of nat * seq1 of nat ==> bool
+    assert(data, expected) == return data = expected
+    post RESULT = true;
+end TEST
+        

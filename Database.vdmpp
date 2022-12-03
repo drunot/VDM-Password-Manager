@@ -1,0 +1,34 @@
+class Database is subclass of GLOBAL
+types
+    public State = <Locked> | <Unlocked>;
+instance variables
+    private passwords: seq of Password := [];
+    private eqState: State := <Unlocked>;
+inv eqState = <Locked> => 
+    forall password in seq passwords & password.GetEncryptionState() = <Encrypted>;
+inv eqState = <Unlocked> => 
+    forall password in seq passwords & password.GetEncryptionState() = <PlainText>;
+operations   
+
+    public Unlock: EncryptionKey ==> ()
+    Unlock(encKey) == 
+   ( for all i in set inds passwords do
+        passwords(i).Decrypt(encKey);
+    let isUnlocked = {password.GetEncryptionState() | password in seq passwords} in
+    if(card isUnlocked = 1 and <PlainText> in set isUnlocked) then
+        eqState  := <Unlocked>)
+    pre eqState = <Locked>
+    post forall password in seq passwords & password.GetEncryptionState() = <PlainText> => eqState = <Unlocked>;
+    
+    public Lock: EncryptionKey_t ==> ()
+    Lock(encKey) == 
+    (for all i in set inds passwords do
+        passwords(i).Encrypt(encKey);)
+    pre eqState = <Unlocked>
+    post eqState = <Locked>;
+
+    public pure GetLockState: () ==> State
+        GetLockState() ==
+        return eqState;
+
+end Database

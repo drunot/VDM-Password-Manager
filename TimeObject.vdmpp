@@ -1,0 +1,6 @@
+class TimeObject is subclass of GLOBAL
+operations
+    public TimeTicked: Seconds ==> ()
+    TimeTicked(currentTime) == 
+        is not yet specified
+end TimeObject

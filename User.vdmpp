@@ -1,0 +1,45 @@
+class User is subclass of GLOBAL
+instance variables
+    private userName: String;
+    private password: Password_t;
+    private userId: int;
+    private internalEncryptionKey: EncryptionKey;
+    private static idCounter: int := 0;
+    private static allUsers: set of User := {};
+
+inv forall user1 in set allUsers & 
+    forall user2 in set allUsers \ {user1} & 
+    user1.internalEncryptionKey <> user2.internalEncryptionKey and
+    user1.userName <> user2.userName ;
+
+operations
+    public User: String * String ==> User
+    User(userNme, passwd) ==
+    (userName:=userNme;
+    password:=new Password(passwd);
+    userId := idCounter;
+    internalEncryptionKey := new EncryptionKey(idCounter, new Password(passwd));
+    idCounter := idCounter + 1;
+    allUsers := allUsers union {self};
+    )
+    pre forall user in set allUsers & userNme <> user.userName
+    post userId <> idCounter and allUsers~ psubset allUsers;
+
+    public GetEncryptionKey: Password_t ==> EncryptionKey_t
+        GetEncryptionKey(passwd) ==
+        return new EncryptionKey(userId, passwd)
+        pre password = passwd;
+
+    public pure IsCorrectPassword: Password_t ==> bool
+         IsCorrectPassword(pass) == 
+            (if pass = password then return true; return false)
+        post RESULT = false or pass = password;
+
+    public pure GetUsername: () ==> String
+        GetUsername() == return userName;
+
+    public ChangePassword: String ==> ()
+        ChangePassword(passwd) == (password:=new Password(passwd);
+        internalEncryptionKey :=  GetEncryptionKey(new Password(passwd)));
+
+end User

@@ -1,0 +1,41 @@
+class TestUser is subclass of TEST
+types
+    password_test = Password * bool;
+instance variables
+    userPassword: String := "Test123";
+    user1: User := new User("TestUser1", userPassword);
+    user2: User := new User("TestUser2", userPassword);
+traces
+    TestIsPasswordCorrect:
+        let pswd in set {mk_(new Password("wrong"), false), 
+                         mk_(new Password("otherPass"), false),
+                         mk_(new Password("TestUser1"), false), 
+                         mk_(new Password("Test123"), true)} --be
+          --st user.IsCorrectPassword(pswd) in
+              --user.GetEncryptionKey(pswd)
+          in (assert([BoolToNat(user1.IsCorrectPassword(pswd.#1))], [BoolToNat(pswd.#2)]);
+              assert([BoolToNat(user2.IsCorrectPassword(pswd.#1))], [BoolToNat(pswd.#2)]););
+    TestGetUsername:
+        let usr in set {mk_("TestUser2", false, true), 
+                         mk_("TestUser1", true, false), 
+                         mk_("Test123", false, false), 
+                         mk_("Test321", false, false)}
+          in (assert([BoolToNat(user1.GetUsername() = usr.#1)], 
+                    [BoolToNat(usr.#2)]);
+             assert([BoolToNat(user2.GetUsername() = usr.#1)], 
+                    [BoolToNat(usr.#3)]););
+    TestGetEncryptionKey:
+                let usr in set{user1, user2} in
+                    usr.GetEncryptionKey(new Password(userPassword));
+    
+
+    TestChangePassword:
+                let newPass in set {"1", "2", "3", "4"} in
+                   ( assert([BoolToNat(user1.IsCorrectPassword(new Password(userPassword))),
+                            BoolToNat(user1.IsCorrectPassword(new Password(newPass)))], 
+                            [BoolToNat(true),BoolToNat(false)]);
+                    (user1.ChangePassword(newPass));
+                    assert([BoolToNat(user1.IsCorrectPassword(new Password(userPassword))),
+                            BoolToNat(user1.IsCorrectPassword(new Password(newPass)))], 
+                            [BoolToNat(false),BoolToNat(true)]););
+end TestUser

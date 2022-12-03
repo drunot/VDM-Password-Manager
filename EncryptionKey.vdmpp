@@ -1,0 +1,11 @@
+class EncryptionKey
+instance variables
+    public keyToken : token;
+operations
+    public EncryptionKey: int * Password ==> EncryptionKey
+    EncryptionKey(keyId, passwd) ==
+        (keyToken := mk_token({keyId, passwd.GetPasswordToken()}));
+
+    public pure GetToken: () ==> token
+    GetToken() == return keyToken;
+end EncryptionKey
