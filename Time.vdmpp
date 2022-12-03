@@ -2,7 +2,17 @@ class Time is subclass of GLOBAL
     instance variables
         currentTime: Seconds := 0;
         updateObjects: seq of TimeObject := [];
+        static timeInstance : [Time] := nil;
     operations
+
+        private Time: () ==> Time
+            Time() == return self;
+
+        static public GetInstance: () ==> Time
+            GetInstance() == (if timeInstance = nil then
+                timeInstance := new Time();
+            return timeInstance);
+
         public TickTime: Seconds ==> ()
         TickTime(amout) == (currentTime := currentTime + amout;
             for all i in set inds updateObjects do

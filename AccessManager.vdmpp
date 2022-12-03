@@ -2,19 +2,22 @@ class AccessManager is subclass of TimeObject
     instance variables
         user: User;
         database: Database := new Database();
-        acceptedDevices: set of Device := {};
+        acceptedDevices: set of Device_t := {};
         encKey: [EncryptionKey] := nil;
         lastActiveTime: Seconds := 0;
         curTime: Seconds := 0;
+        accessState: LockState := <Unlocked>;
         static timeout: Seconds := 60 * 5;
-    inv encKey <> nil => lastActiveTime + timeout <= curTime; 
 operations
 
-    public AccessManager: User * Time ==> AccessManager
-    AccessManager(theUser, time) == (user := theUser;
-        time.Register(self));
+    public AccessManager: String * String * Device_t ==> AccessManager
+    AccessManager(userName, password, dev) == (user := new User(userName, password);
+        Time`GetInstance().Register(self);
+        encKey := user.GetEncryptionKey(new Password(password));
+        AuthenticateDevice(dev);
+        (dcl foo: bool; foo := Logout()));
 
-    Login: String * Device ==> bool
+    public Login: String * Device ==> bool
     Login(password, dev) == (
         if dev in set acceptedDevices then
         let pass = new Password(password) in
@@ -23,26 +26,41 @@ operations
                 let ek = user.GetEncryptionKey(pass) in
                 (database.Unlock(ek);
                 encKey := ek;
+                accessState := <Unlocked> ;
                 return true)
                 
         );
         return false
-    );
+    )
+    post accessState = <Unlocked> => database.GetLockState() = <Unlocked>;
 
-    Logout: () ==> ()
-    Logout() == (database.Lock(encKey);encKey:=nil);
-
+    public Logout: () ==> bool
+    Logout() == 
+            (if accessState = <Unlocked> then (database.Lock(encKey);encKey:=nil; accessState := <Locked>; return true); return false)
+        post accessState = <Locked> and database.GetLockState() = <Locked>;
     public TimeTicked: Seconds ==> ()
     TimeTicked(currentTime) == (
         if encKey <> nil and lastActiveTime + timeout <= currentTime then
-            Logout();
+            (dcl foo: bool; foo := Logout());
         curTime := currentTime
-    );
+    )
+    post currentTime = curTime and lastActiveTime <= curTime;
 
     public DoActivity: () ==> ()
-    DoActivity() == lastActiveTime := curTime;
+    DoActivity() == lastActiveTime := curTime
+    post lastActiveTime = curTime;
+
+    public AuthenticateDevice: Device_t ==> ()
+        AuthenticateDevice(dev) == acceptedDevices := acceptedDevices union {dev};
 
     public pure GetUserName: () ==> String
     GetUserName() == return user.GetUsername();
     
+    public pure GetDatabase: () ==> Database
+    GetDatabase() == return database
+    pre database.GetLockState() = <Unlocked>;
+
+    public pure GetLoginState: () ==> LockState
+    GetLoginState() == return accessState;
+
 end AccessManager

@@ -1,34 +1,45 @@
 class Database is subclass of GLOBAL
-types
-    public State = <Locked> | <Unlocked>;
 instance variables
     private passwords: seq of Password := [];
-    private eqState: State := <Unlocked>;
-inv eqState = <Locked> => 
-    forall password in seq passwords & password.GetEncryptionState() = <Encrypted>;
-inv eqState = <Unlocked> => 
-    forall password in seq passwords & password.GetEncryptionState() = <PlainText>;
+    private eqState: LockState := <Unlocked>;
 operations   
 
     public Unlock: EncryptionKey ==> ()
-    Unlock(encKey) == 
-   ( for all i in set inds passwords do
-        passwords(i).Decrypt(encKey);
-    let isUnlocked = {password.GetEncryptionState() | password in seq passwords} in
-    if(card isUnlocked = 1 and <PlainText> in set isUnlocked) then
-        eqState  := <Unlocked>)
-    pre eqState = <Locked>
-    post forall password in seq passwords & password.GetEncryptionState() = <PlainText> => eqState = <Unlocked>;
+        Unlock(encKey) == 
+        ( for all i in set inds passwords do
+            passwords(i).Decrypt(encKey);
+        let isUnlocked = {password.GetEncryptionState() | password in seq passwords} in
+        if(card isUnlocked = 1 and <PlainText> in set isUnlocked or len passwords = 0) then
+            eqState  := <Unlocked>)
+        pre eqState = <Locked> and forall password in seq passwords & password.GetEncryptionState() = <Encrypted>
+        post eqState = <Unlocked> and forall password in seq passwords & password.GetEncryptionState() = <PlainText>;
     
     public Lock: EncryptionKey_t ==> ()
-    Lock(encKey) == 
-    (for all i in set inds passwords do
-        passwords(i).Encrypt(encKey);)
-    pre eqState = <Unlocked>
-    post eqState = <Locked>;
+        Lock(encKey) == 
+        (for all i in set inds passwords do
+            passwords(i).Encrypt(encKey);
+            eqState := <Locked>)
+        pre eqState = <Unlocked> and forall password in seq passwords & password.GetEncryptionState() = <PlainText>
+        post eqState = <Locked> and forall password in seq passwords & password.GetEncryptionState() = <Encrypted>;
 
-    public pure GetLockState: () ==> State
+    public pure GetLockState: () ==> LockState
         GetLockState() ==
         return eqState;
 
+    public AddPasswordToDatabase: Password ==> ()
+        AddPasswordToDatabase(password) == passwords := passwords ^ [password]
+        pre eqState = <Unlocked> and password.GetEncryptionState() = <PlainText>
+        post len passwords = len passwords~ + 1;
+
+    public GetAllPasswords: () ==> seq of Password
+        GetAllPasswords() == return passwords;
+
+    public FindPasswords: String ==> seq of Password
+        FindPasswords(match) == 
+            (dcl ret : seq of Password := [];
+                for all i in set inds passwords do
+                    if passwords(i).GetMatchString() = match then
+                        ret := ret ^ [passwords(i)];
+                return ret;
+            )
 end Database

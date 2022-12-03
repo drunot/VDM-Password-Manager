@@ -1,0 +1,85 @@
+class TestAccessManager is subclass of TEST
+instance variables
+    public passwordText: String := "UserPassword";
+    public device: Device_t := new Device();
+    public accessManager: AccessManager;
+    time: Time := Time`GetInstance();
+operations
+    public TestAccessManager: () ==> TestAccessManager
+    TestAccessManager() == (accessManager := new AccessManager("TestUser", passwordText, device);
+            (dcl foo: bool; foo := accessManager.Login(passwordText, device));
+            accessManager.GetDatabase().AddPasswordToDatabase(new Password("GamerTag", "YouShallNotPassword1", "https://store.steampowered.com"));
+            accessManager.GetDatabase().AddPasswordToDatabase(new Password("BuisnessAccount", "buisness123", "https://bank.com"));
+            accessManager.GetDatabase().AddPasswordToDatabase(new Password("testmail@mail.com", "test123", "https://mail.com"));
+            accessManager.GetDatabase().AddPasswordToDatabase(new Password("PersonalAccount", "birthday", "https://bank.com"));
+            (dcl foo: bool; foo := accessManager.Logout()););
+
+    public testTimeout: seq of Seconds * [nat] ==> ()
+    testTimeout(timeSeq, timeoutIdx) == 
+        for all i in set inds timeSeq do 
+        (time.TickTime(timeSeq(i));
+         if timeoutIdx <> nil and i >= timeoutIdx then
+            (dcl foo: bool; foo := assert([BoolToNat(accessManager.GetLoginState() = <Locked>)], [BoolToNat(true)]))
+            else 
+            (dcl foo: bool; foo := assert([BoolToNat(accessManager.GetLoginState() = <Unlocked>)], [BoolToNat(true)]));
+            );
+
+    public testDoActivity: seq of Seconds * [nat] ==> ()
+    testDoActivity(timeSeq, timeoutIdx) == 
+        for all i in set inds timeSeq do 
+        (time.TickTime(timeSeq(i));
+         accessManager.DoActivity();
+         if timeoutIdx <> nil and i >= timeoutIdx then
+            (dcl foo: bool; foo := assert([BoolToNat(accessManager.GetLoginState() = <Locked>)], [BoolToNat(true)]))
+            else 
+            (dcl foo: bool; foo := assert([BoolToNat(accessManager.GetLoginState() = <Unlocked>)], [BoolToNat(true)]));
+            );
+traces
+    TestLogin:
+        let test in set {mk_(passwordText, true),
+                         mk_("OtherPassword", false),
+                         mk_("ThirdPassword", false)} in
+        assert([BoolToNat(accessManager.Login(test.#1, device))],[BoolToNat(test.#2)])
+
+    TestLogout:
+        (assert([BoolToNat(accessManager.Logout())],[BoolToNat(false)]);
+         assert([BoolToNat(accessManager.Login(passwordText, device))],[BoolToNat(true)]);
+         assert([BoolToNat(accessManager.Logout())],[BoolToNat(true)]);
+        )
+
+    TestAuthenticatedDevices:
+        let dev in set {
+            mk_(device, true),
+            mk_(new Device(), false)
+        } in
+         (assert([BoolToNat(accessManager.Login(passwordText, dev.#1))],[BoolToNat(dev.#2)]);
+          accessManager.Logout();
+          accessManager.AuthenticateDevice(dev.#1);
+          assert([BoolToNat(accessManager.Login(passwordText, dev.#1))],[BoolToNat(true)]);
+          accessManager.Logout();
+          assert([BoolToNat(accessManager.Login(passwordText, device))],[BoolToNat(true)]);)
+
+    TestLogoutOnTimeout:
+        let intervals in set {
+            mk_([10,20,270], 3),
+            mk_([310, 301,1], 0),
+            mk_([43, 257, 1, 41], 2),
+            mk_([1, 2, 3, 4], nil)
+        } in
+            (accessManager.Login(passwordText, device);
+             testTimeout(intervals.#1, intervals.#2))
+
+    TestDoActivity:
+        let intervals in set {
+            mk_([10,20,270], nil),
+            mk_([310, 301,1], 0),
+            mk_([43, 257, 1, 41], nil),
+            mk_([1, 2, 3, 4], nil),
+            mk_([12, 23, 300, 4], 3)
+        } in
+            (accessManager.Login(passwordText, device);
+             testDoActivity(intervals.#1, intervals.#2))
+
+    TestGetUsername:
+        assert([BoolToNat(accessManager.GetUserName() = "TestUser")], [BoolToNat(true)])
+end TestAccessManager

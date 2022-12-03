@@ -1,29 +1,15 @@
 class Environment is subclass of TEST
 instance variables
-    user1: User := new User("TestUser1", "Password123");
-    user2: User := new User("TestUser2", "Password123");
-    key: [EncryptionKey] := nil;
-    
-    password: [Password] := nil;
-    dummy: bool := false;
+    testTest: [TestAccessManager] := nil;
+    public static io :IO:= new IO();
 operations
     public Run :()==>()
-    Run() == (password := new Password("Test");
-    dummy := assert([BoolToNat(password.GetMatchString() = nil), 
-            BoolToNat(password.GetUserName() = nil)],
-            [BoolToNat(true),BoolToNat(true)]);
-    password := new Password("Test", "https://testpage.com");
-    dummy := assert([BoolToNat(password.GetMatchString() = nil), 
-            BoolToNat(password.GetUserName() = nil)],
-            [BoolToNat(true),BoolToNat(false)]);
-    password := new Password("TestName", "Test", "https://testpage.com");
-    dummy := assert([BoolToNat(password.GetMatchString() = nil), 
-            BoolToNat(password.GetUserName() = nil)],
-            [BoolToNat(false),BoolToNat(false)]));
-
-
-    test: seq of char * seq of char ==> bool
-    test(tst1, tst2) == return (tst1 = tst2)
-    pre tst1 = tst2;
+    Run() == (        for all intervals in set {
+            mk_([10,20,270], 3)
+        } do
+            (
+             testTest := new TestAccessManager();
+             (dcl foo: bool; foo := testTest.accessManager.Login(testTest.passwordText, testTest.device));
+             testTest.testTimeout(intervals.#1, intervals.#2)))
 
 end Environment

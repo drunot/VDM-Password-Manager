@@ -25,7 +25,7 @@ end TestTimeObject
 
 class TestTime is subclass of TEST
 instance variables
-    time: Time := new Time();
+    time: Time := Time`GetInstance();
 traces
     TestTickTime:
         let secs1 in set {20,30,40,50,12,1,302} in

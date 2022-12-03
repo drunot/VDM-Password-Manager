@@ -1,0 +1,38 @@
+class TestDatabase is subclass of TEST
+instance variables
+    database: Database := new Database();
+operations
+    TestDatabase: () ==> TestDatabase
+    TestDatabase() == (
+            database.AddPasswordToDatabase(new Password("GamerTag", "YouShallNotPassword1", "https://store.steampowered.com"));
+            database.AddPasswordToDatabase(new Password("BuisnessAccount", "buisness123", "https://bank.com"));
+            database.AddPasswordToDatabase(new Password("testmail@mail.com", "test123", "https://mail.com"));
+            database.AddPasswordToDatabase(new Password("PersonalAccount", "birthday", "https://bank.com"))
+        )
+traces
+    TestLockUnlock:
+        (
+            assert([BoolToNat(database.GetLockState() = <Unlocked>)], [BoolToNat(true)]);
+            database.Lock(new EncryptionKey(1, new Password("SomePassword")));
+            assert([BoolToNat(database.GetLockState() = <Locked>)], [BoolToNat(true)]);
+            database.Unlock(new EncryptionKey(1, new Password("SomePassword")));
+            assert([BoolToNat(database.GetLockState() = <Unlocked>)], [BoolToNat(true)]);
+        )
+
+    TestGetDatabase:
+        (
+            assert([len database.GetAllPasswords()], [4]);
+            database.AddPasswordToDatabase(new Password("PersonalAccount", "birthday", "https://bank.com"));
+            assert([len database.GetAllPasswords()], [5]);
+            database.AddPasswordToDatabase(new Password("SomeAccount", "password", "app:string:to:match"));
+            assert([len database.GetAllPasswords()], [6])
+        )
+
+    TestFindPassowrds:
+        let data in set {
+            mk_("https://mail.com", 1),
+            mk_("https://bank.com", 2),
+            mk_("https://store.steampowered.com", 1)
+        } in
+            assert([BoolToNat((len database.FindPasswords(data.#1)) = data.#2)], [BoolToNat(true)])
+end TestDatabase
