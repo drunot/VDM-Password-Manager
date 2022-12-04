@@ -4,7 +4,7 @@ instance variables
 operations
     public World :()==>World
     World() ==
-    env := new Environment();
+    env := new Environment("scenario.txt");
 
     public Run :()==>()
     Run() ==

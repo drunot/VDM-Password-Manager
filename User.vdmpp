@@ -35,8 +35,8 @@ operations
             (if pass = password then return true; return false)
         post RESULT = false or pass = password;
 
-    public pure GetUsername: () ==> String
-        GetUsername() == return userName;
+    public pure GetUserName: () ==> String
+        GetUserName() == return userName;
 
     public ChangePassword: String ==> ()
         ChangePassword(passwd) == (password:=new Password(passwd);

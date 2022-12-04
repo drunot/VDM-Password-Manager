@@ -1,15 +1,150 @@
 class Environment is subclass of TEST
+types 
+    private Actions = <Login> | <Logout> | <FindPass> | <AddPass> | <RMPass> | <AuthDevice> | <NewDevice> | <FindUser>;
+    private UserToCreate = (String * String * seq of (String * String * String));
+    private ActionsToDo = ([Seconds] * [Actions] * (LoginArgs | LogoutArgs | FindPassArgs | AddPassArgs | RMPassArgs | AuthDeviceArgs | NewDeviceArgs | FindUserArgs));
+    
+    private LoginArgs = (String * nat);
+
+    private LogoutArgs = [nat];
+
+    private FindPassArgs = String;
+    
+    private AddPassArgs = (String * String * String);
+
+    private RMPassArgs = nat;
+
+    private AuthDeviceArgs = nat;
+
+    private NewDeviceArgs = [nat];
+    
+    private FindUserArgs = String;
+
+    private inline =(seq of UserToCreate * seq of ActionsToDo);
+
 instance variables
-    testTest: [TestAccessManager] := nil;
-    public static io :IO:= new IO();
+    users : UserDatabase := new UserDatabase();
+    actions : seq of ActionsToDo;
+    currentUser : [AccessManager] := nil;
+    devices : seq of Device_t := [new Device()]; 
+    time : Time := Time`GetInstance();
 operations
+    public Environment :String==>Environment
+    Environment(fname) ==
+        def mk_(-,mk_(allUsers, allActions))=io.freadval[inline](fname)
+        in
+            (actions := allActions;
+             for all i in set inds allUsers do
+                (dcl acMa : AccessManager,
+                    foo: bool;
+                    foo := users.AddUser(allUsers(i).#1, allUsers(i).#2, devices(1));
+                    acMa := users.FindUser(allUsers(i).#1);
+                    foo := acMa.Login(allUsers(i).#2, devices(1));
+                    for all k in set inds allUsers(i).#3 do
+                        acMa.GetDatabase().AddPassword(new Password(allUsers(i).#3(k).#1,allUsers(i).#3(k).#2,allUsers(i).#3(k).#3));
+                    foo := acMa.Logout();
+                ));
+
     public Run :()==>()
-    Run() == (        for all intervals in set {
-            mk_([10,20,270], 3)
-        } do
-            (
-             testTest := new TestAccessManager();
-             (dcl foo: bool; foo := testTest.accessManager.Login(testTest.passwordText, testTest.device));
-             testTest.testTimeout(intervals.#1, intervals.#2)))
+        Run() == 
+            while len actions > 0 do
+                (dcl
+                    -- Preamble --
+                    action : ActionsToDo := hd actions;
+                    def mk_(timeTick, actionType, args) = action in(
+                    io.print("\n-----------------\n");
+                    -- Handle action --
+                    if timeTick <> nil and timeTick <> 0 then
+                        (time.TickTime(timeTick);
+                        io.print("Time passed: ");
+                        if(timeTick > 60) then
+                            (io.print(timeTick div 60);io.print(" minutes "));
+                        if((timeTick mod 60) <> 0) then
+                            (io.print(timeTick mod 60);io.print(" seconds"));
+                            io.print("\n"););
+                        
+                    cases actionType:
+                    <Login> -> HandleLogin(args),
+                    <Logout> -> HandleLogout(args),
+                    <FindPass> -> HandleFindPass(args),
+                    <AddPass> -> HandleAddPass(args),
+                    <RMPass> -> HandleRMPass(args),
+                    <AuthDevice> -> HandleAuthDevice(args),
+                    <NewDevice> -> HandleNewDevice(args),
+                    <FindUser> -> HandleFindUser(args)
+                    end;
+                    -- Postamble --
+                    actions := tl actions;
+                    io.print("-----------------\n");
+                ));
+        
+
+    HandleLogin: LoginArgs ==> ()
+    HandleLogin(args) == 
+        def mk_(password, devIdx) = args in
+            if currentUser.Login(password, devices(devIdx)) then
+                io.print("Login success!\n")
+            else io.print("Login failed!\n");
+
+    HandleLogout: LogoutArgs ==> ()
+    HandleLogout(-) == 
+        if currentUser.Logout() then
+            io.print("Logout success!\n")
+        else io.print("Logout failed!\n");
+
+    HandleFindPass: FindPassArgs ==> ()
+        HandleFindPass(match) == (dcl database : [Database] := currentUser.GetDatabase(),
+                                    matchedPasses : seq of Password;
+            if database <> nil then
+                (matchedPasses := database.FindPasswords(match);
+                if len matchedPasses > 0 then
+                    (io.print(len matchedPasses);io.print(" passwords was found matching \"");io.print(match);io.print("\":\n");
+                    for all i in set inds matchedPasses do
+                        matchedPasses(i).PrintPassword())
+                else (io.print("No passwords was found matching \"");io.print(match);io.print("\".\n");))
+            else io.print("Password could not be found. Database is locked.\n"););
+    
+    HandleAddPass: AddPassArgs ==> ()
+    HandleAddPass(args) ==
+        (dcl database : [Database] := currentUser.GetDatabase(),
+        pass : Password;
+         if database <> nil then
+            def mk_(userName, password, match) = args in
+                ( pass := new Password(userName, password, match);
+                    database.AddPassword(pass);
+                    io.print("Following password was added:\n");
+                    pass.PrintPassword())
+         else io.print("Password could not be added. Database is locked.\n"));
+            
+    HandleRMPass: RMPassArgs ==> ()
+    HandleRMPass(idx) ==
+        (dcl database : [Database] := currentUser.GetDatabase(),
+        pass : Password;
+         if database <> nil then
+                (pass := database.GetAllPasswords()(idx);
+                 database.RemovePassword(idx);
+                 io.print("Following password was removed:\n");
+                 pass.PrintPassword())
+         else io.print("Password could not be added. Database is locked.\n"));
+
+    HandleNewDevice: NewDeviceArgs ==> ()
+    HandleNewDevice(-) ==
+        ( devices := devices ^ [new Device()];
+          io.print("Device # ");io.print(len devices);io.print(" was added.\n");
+        );
+
+    HandleAuthDevice: AuthDeviceArgs ==> ()
+        HandleAuthDevice(idx) == (currentUser.AuthorizeDevice(devices(idx));
+         io.print("Device # ");io.print(idx);io.print(" was authorized to user: \n");io.print(currentUser.GetUserName());io.print(".\n");
+        );
+
+    HandleFindUser: FindUserArgs ==> ()
+    HandleFindUser(userName) == (currentUser := users.FindUser(userName);
+        if currentUser <> nil then
+            (io.print("User: ");io.print(userName);io.print(" was found!\n"))
+            else
+            (io.print("Could not find the user ");io.print(userName);io.print(".\n"))
+        );
+
 
 end Environment

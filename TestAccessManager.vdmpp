@@ -8,10 +8,10 @@ operations
     public TestAccessManager: () ==> TestAccessManager
     TestAccessManager() == (accessManager := new AccessManager("TestUser", passwordText, device);
             (dcl foo: bool; foo := accessManager.Login(passwordText, device));
-            accessManager.GetDatabase().AddPasswordToDatabase(new Password("GamerTag", "YouShallNotPassword1", "https://store.steampowered.com"));
-            accessManager.GetDatabase().AddPasswordToDatabase(new Password("BuisnessAccount", "buisness123", "https://bank.com"));
-            accessManager.GetDatabase().AddPasswordToDatabase(new Password("testmail@mail.com", "test123", "https://mail.com"));
-            accessManager.GetDatabase().AddPasswordToDatabase(new Password("PersonalAccount", "birthday", "https://bank.com"));
+            accessManager.GetDatabase().AddPassword(new Password("GamerTag", "YouShallNotPassword1", "https://store.steampowered.com"));
+            accessManager.GetDatabase().AddPassword(new Password("BuisnessAccount", "buisness123", "https://bank.com"));
+            accessManager.GetDatabase().AddPassword(new Password("testmail@mail.com", "test123", "https://mail.com"));
+            accessManager.GetDatabase().AddPassword(new Password("PersonalAccount", "birthday", "https://bank.com"));
             (dcl foo: bool; foo := accessManager.Logout()););
 
     public testTimeout: seq of Seconds * [nat] ==> ()
@@ -41,20 +41,24 @@ traces
                          mk_("ThirdPassword", false)} in
         assert([BoolToNat(accessManager.Login(test.#1, device))],[BoolToNat(test.#2)])
 
+    TestLoginTwice:
+        (assert([BoolToNat(accessManager.Login(passwordText, device))],[BoolToNat(true)]);
+        assert([BoolToNat(accessManager.Login(passwordText, device))],[BoolToNat(false)]));
+
     TestLogout:
         (assert([BoolToNat(accessManager.Logout())],[BoolToNat(false)]);
          assert([BoolToNat(accessManager.Login(passwordText, device))],[BoolToNat(true)]);
          assert([BoolToNat(accessManager.Logout())],[BoolToNat(true)]);
         )
 
-    TestAuthenticatedDevices:
+    TestAuthorizedDevices:
         let dev in set {
             mk_(device, true),
             mk_(new Device(), false)
         } in
          (assert([BoolToNat(accessManager.Login(passwordText, dev.#1))],[BoolToNat(dev.#2)]);
           accessManager.Logout();
-          accessManager.AuthenticateDevice(dev.#1);
+          accessManager.AuthorizeDevice(dev.#1);
           assert([BoolToNat(accessManager.Login(passwordText, dev.#1))],[BoolToNat(true)]);
           accessManager.Logout();
           assert([BoolToNat(accessManager.Login(passwordText, device))],[BoolToNat(true)]);)
@@ -82,4 +86,10 @@ traces
 
     TestGetUsername:
         assert([BoolToNat(accessManager.GetUserName() = "TestUser")], [BoolToNat(true)])
+
+    TestGetDatabase:
+        (assert([BoolToNat(accessManager.GetDatabase() = nil)], [BoolToNat(true)]);
+         accessManager.Login(passwordText, device);
+         assert([BoolToNat(accessManager.GetDatabase() <> nil)], [BoolToNat(true)])
+        );
 end TestAccessManager

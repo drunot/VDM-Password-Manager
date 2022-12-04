@@ -1,0 +1,26 @@
+mk_(
+    [
+        mk_("alanKeyVault", "somePassword", [
+            mk_("alan", "alan190286", "https://somesite.com"),
+            mk_("alansUser", "alan190286!", "https://someOthersite.com"),
+            mk_("alanPrivate", "superGoodPassword", "https://bank.com"),
+            mk_("alansBusiness", "anotherGoodPassword", "https://bank.com")
+        ])
+    ],
+    [
+        mk_(nil, <FindUser>, "alanKeyVault"),
+        mk_(nil, <Login>, mk_("somePassword", 1)),
+        mk_(nil, <NewDevice>, nil),
+        mk_(145, <Logout>, nil),
+        mk_(nil, <FindPass>, "https://bank.com"),
+        mk_(nil, <RMPass>, 4),
+        mk_(178, <Login>, mk_("somePassword", 2)),
+        mk_(nil, <AuthDevice>, 2),
+        mk_(nil, <Login>, mk_("somePassword", 2)),
+        mk_(nil, <FindPass>, "https://bank.com"),
+        mk_(nil, <RMPass>, 4),
+        mk_(nil, <AddPass>, mk_("alansOtherBusiness", "ThisIsAGoodPasswordAsWell", "https://bank.com")),
+        mk_(nil, <FindPass>, "https://bank.com"),
+        mk_(311, nil, nil)
+    ]
+)

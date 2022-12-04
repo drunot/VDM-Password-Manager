@@ -17,5 +17,7 @@ types
         eq a = b == if a = nil or b = nil then a = nil and b = nil else (a.GetToken() = b.GetToken());
     
     public LockState = <Locked> | <Unlocked>;
+instance variables
+    public static io: IO := new IO();
 
 end GLOBAL

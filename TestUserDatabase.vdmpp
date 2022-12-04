@@ -1,0 +1,37 @@
+class TestUserDatabase is subclass of TEST
+instance variables
+    database: UserDatabase := new UserDatabase();
+    device: Device_t := new Device();
+operations
+    TestUserDatabase: () ==> TestUserDatabase
+    TestUserDatabase() == 
+        (dcl foo: bool; foo := database.AddUser("User1", "password1", device);
+        foo := database.AddUser("User2", "password2", device);
+        foo := database.AddUser("User3", "password3", device);
+        foo := database.AddUser("User4", "password4", device);
+        foo := database.AddUser("User5", "password5", device));
+
+traces
+    
+    TestFindUser:
+        let toFind in set {
+            mk_("User1", true),
+            mk_("User2", true),
+            mk_("User3", true),
+            mk_("User4", true),
+            mk_("User5", true),
+            mk_("User6", false),
+            mk_("User7", false)
+        } in(assert([BoolToNat(database.FindUser(toFind.#1) <> nil)],[BoolToNat(toFind.#2)]))
+
+    TestCreateUser:
+        let toCreate in set {
+            mk_("User6", "password6", true),
+            mk_("User7", "password7", true),
+            mk_("User8", "password8", true),
+            mk_("User1", "password1", false),
+            mk_("User2", "password2", false)
+        } in
+            assert([BoolToNat(database.AddUser(toCreate.#1,toCreate.#2,device))],[BoolToNat(toCreate.#3)]);
+
+end TestUserDatabase

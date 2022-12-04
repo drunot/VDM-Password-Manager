@@ -15,14 +15,14 @@ traces
               --user.GetEncryptionKey(pswd)
           in (assert([BoolToNat(user1.IsCorrectPassword(pswd.#1))], [BoolToNat(pswd.#2)]);
               assert([BoolToNat(user2.IsCorrectPassword(pswd.#1))], [BoolToNat(pswd.#2)]););
-    TestGetUsername:
+    TestGetUserName:
         let usr in set {mk_("TestUser2", false, true), 
                          mk_("TestUser1", true, false), 
                          mk_("Test123", false, false), 
                          mk_("Test321", false, false)}
-          in (assert([BoolToNat(user1.GetUsername() = usr.#1)], 
+          in (assert([BoolToNat(user1.GetUserName() = usr.#1)], 
                     [BoolToNat(usr.#2)]);
-             assert([BoolToNat(user2.GetUsername() = usr.#1)], 
+             assert([BoolToNat(user2.GetUserName() = usr.#1)], 
                     [BoolToNat(usr.#3)]););
     TestGetEncryptionKey:
                 let usr in set{user1, user2} in

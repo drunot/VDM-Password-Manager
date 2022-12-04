@@ -2,6 +2,8 @@ class Database is subclass of GLOBAL
 instance variables
     private passwords: seq of Password := [];
     private eqState: LockState := <Unlocked>;
+
+    inv forall password in seq passwords & password.GetMatchString() <> nil;
 operations   
 
     public Unlock: EncryptionKey ==> ()
@@ -26,10 +28,13 @@ operations
         GetLockState() ==
         return eqState;
 
-    public AddPasswordToDatabase: Password ==> ()
-        AddPasswordToDatabase(password) == passwords := passwords ^ [password]
+    public AddPassword: Password ==> ()
+        AddPassword(password) == if password.GetMatchString() <> nil then passwords := 
+            passwords ^ [password] 
+        else 
+            io.print("Password needs to have a match string to be added to the database.\n")
         pre eqState = <Unlocked> and password.GetEncryptionState() = <PlainText>
-        post len passwords = len passwords~ + 1;
+        post password.GetMatchString() <> nil => len passwords = len passwords~ + 1;
 
     public GetAllPasswords: () ==> seq of Password
         GetAllPasswords() == return passwords;
@@ -42,4 +47,10 @@ operations
                         ret := ret ^ [passwords(i)];
                 return ret;
             )
+        pre eqState = <Unlocked>;
+
+    public RemovePassword: nat ==> ()
+        RemovePassword(idx) == if idx <= len passwords then
+            passwords := [passwords(k) | k in set inds passwords & k <> idx]
+        pre eqState = <Unlocked>;
 end Database

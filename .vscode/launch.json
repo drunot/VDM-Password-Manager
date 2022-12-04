@@ -1,10 +1,10 @@
 {
   "configurations": [
     {
-      "name": "Lens config: Debug World`Run",
+      "name": "Lens config: Launch World`Run",
       "type": "vdm",
       "request": "launch",
-      "noDebug": false,
+      "noDebug": true,
       "defaultName": "World",
       "command": "p new World().Run()"
     }

@@ -14,12 +14,13 @@ operations
     AccessManager(userName, password, dev) == (user := new User(userName, password);
         Time`GetInstance().Register(self);
         encKey := user.GetEncryptionKey(new Password(password));
-        AuthenticateDevice(dev);
+        AuthorizeDevice(dev);
         (dcl foo: bool; foo := Logout()));
 
     public Login: String * Device ==> bool
     Login(password, dev) == (
-        if dev in set acceptedDevices then
+        if accessState = <Locked> then
+        (if dev in set acceptedDevices then
         let pass = new Password(password) in
         (
             if user.IsCorrectPassword(pass) then
@@ -27,21 +28,28 @@ operations
                 (database.Unlock(ek);
                 encKey := ek;
                 accessState := <Unlocked> ;
-                return true)
+                return true);
+            io.print("User: ");io.print(GetUserName());io.print(", Login Failed: Wrong passoword.\n");
                 
-        );
+        ) else (io.print("User: ");io.print(GetUserName());io.print(", Login Failed: Device not authorized.\n")))
+        else (io.print("User: ");io.print(GetUserName());io.print(", Login Failed: User already logged in.\n"));
         return false
     )
     post accessState = <Unlocked> => database.GetLockState() = <Unlocked>;
 
     public Logout: () ==> bool
     Logout() == 
-            (if accessState = <Unlocked> then (database.Lock(encKey);encKey:=nil; accessState := <Locked>; return true); return false)
+            (if accessState = <Unlocked> then 
+                (database.Lock(encKey);encKey:=nil; accessState := <Locked>; 
+                return true); 
+            io.print("User: ");io.print(GetUserName());io.print(", Logout Failed: User already logged out.\n"); 
+            return false)
         post accessState = <Locked> and database.GetLockState() = <Locked>;
     public TimeTicked: Seconds ==> ()
     TimeTicked(currentTime) == (
         if encKey <> nil and lastActiveTime + timeout <= currentTime then
-            (dcl foo: bool; foo := Logout());
+            (dcl foo: bool; foo := Logout();
+                io.print("User: ");io.print(GetUserName());io.print(", Logged out! User was inactive for too long.\n"));
         curTime := currentTime
     )
     post currentTime = curTime and lastActiveTime <= curTime;
@@ -50,15 +58,16 @@ operations
     DoActivity() == lastActiveTime := curTime
     post lastActiveTime = curTime;
 
-    public AuthenticateDevice: Device_t ==> ()
-        AuthenticateDevice(dev) == acceptedDevices := acceptedDevices union {dev};
+    public AuthorizeDevice: Device_t ==> ()
+        AuthorizeDevice(dev) == acceptedDevices := acceptedDevices union {dev};
 
     public pure GetUserName: () ==> String
-    GetUserName() == return user.GetUsername();
+    GetUserName() == return user.GetUserName();
     
-    public pure GetDatabase: () ==> Database
-    GetDatabase() == return database
-    pre database.GetLockState() = <Unlocked>;
+    public pure GetDatabase: () ==> [Database]
+    GetDatabase() ==  (if database.GetLockState() = <Unlocked> then
+    return database;
+    return nil);
 
     public pure GetLoginState: () ==> LockState
     GetLoginState() == return accessState;
