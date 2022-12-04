@@ -1,0 +1,18 @@
+\appendix{Coverage for ``{{filename}}''}
+
+\begin{vdm_al}
+{{document}}
+\end{vdm_al}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|c|c|} \hline
+        Function or operation & Line & Coverage & Calls \\\hline\hline
+        {% for (fun, line, cov, calls) in data %}
+        {{fun}} & ${{line}}$ & ${{cov}}\%$ & ${{calls}}$ \\\hline
+        {% endfor %}\hline
+        {{filename}} & & ${{totCov}}\%$ & ${{totCalls}}$ \\\hline
+    \end{tabular}
+    \caption{Coverage statistics for {\ttfamily {{filename}} } }
+    \label{lst:cov:{{filename}} }
+\end{table}
