@@ -1,11 +1,11 @@
-class User is subclass of GLOBAL
+class UserData is subclass of GLOBAL
 instance variables
     private userName: String;
     private password: Password_t;
     private userId: int;
     private internalEncryptionKey: EncryptionKey;
     private static idCounter: int := 0;
-    private static allUsers: set of User := {};
+    private static allUsers: set of UserData := {};
 
 inv forall user1 in set allUsers & 
     forall user2 in set allUsers \ {user1} & 
@@ -13,8 +13,8 @@ inv forall user1 in set allUsers &
     user1.userName <> user2.userName ;
 
 operations
-    public User: String * String ==> User
-    User(userNme, passwd) ==
+    public UserData: String * String ==> UserData
+    UserData(userNme, passwd) ==
     (userName:=userNme;
     password:=new Password(passwd);
     userId := idCounter;
@@ -42,4 +42,4 @@ operations
         ChangePassword(passwd) == (password:=new Password(passwd);
         internalEncryptionKey :=  GetEncryptionKey(new Password(passwd)));
 
-end User
+end UserData

@@ -4,12 +4,18 @@ This project implements a VDM++ model of a password manager. The model can be fo
 
 ## Building the report
 
-To generate the files for the appendix run the command bellow from root of the repository. (This uses the coverage files generate by the VDM VSCode extension. It looks for them in `src/.generated/coverage` and not in `.generated/coverage/src` therefore run VS Code from `src` when using the model.)
+Since the VDM VSCode extension cannot create coverage tables a helper python script is created to help with this. To install it's dependencies run:
 
 ```PowerShell
-$ python .\Helpers\generateTable.py
+$ python -m pip install -r Helpers/requirements.txt
+```
+
+To generate the files for the appendix run the command bellow from the `src` folder in the repository. (This uses the coverage files generate by the VDM VSCode extension. It looks for them in `src/.generated/coverage` and not in `.generated/coverage/src` therefore run VS Code from `src` when using the model.)
+
+```PowerShell
+$ python ..\Helpers\generateTable.py
 ```
 
 **NB: Right now the `generateTable.py` script is very rudimentary and uses the first coverage files it finds in `src/.generated/coverage` and not necessarily the newest. Therefore when generating the coverage files make sure to clear this folder first.**
 
-After this the report can be build by building `latex/main.tex`. If using powerShell a helper script `latex/compile.ps1` can alternately be run that uses `PDFLatex` and `biber`.
+After this the report can be build by building `latex/main.tex`. If using PowerShell a helper script `latex/compile.ps1` can alternately be run that uses `PDFLatex` and `biber`.

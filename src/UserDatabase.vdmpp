@@ -15,7 +15,8 @@ operations
     AddUser(userName, password, device) ==
         (for all i in set inds users do
             if users(i).GetUserName() = userName then
-                (io.print("Could not add user, username already exits!\n"); return false);
+                (io.print("Could not add user, username already exits!\n"); 
+                 return false);
         users := users ^ [new AccessManager(userName, password, device)];
         return true);
 

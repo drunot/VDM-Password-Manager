@@ -5,6 +5,9 @@
 *.fls
 *.fdb_latexmk
 *.bcf
+*.bbl
+*.blg
 *.aux
 *.toc
 /latex/prj/coverage
+/latex/main.pdf

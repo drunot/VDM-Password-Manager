@@ -1,8 +1,22 @@
 class Environment is subclass of TEST
 types 
-    private Actions = <Login> | <Logout> | <FindPass> | <AddPass> | <RMPass> | <AuthDevice> | <NewDevice> | <FindUser>;
+    private Actions = <Login> 
+                    | <Logout> 
+                    | <FindPass> 
+                    | <AddPass> 
+                    | <RMPass> 
+                    | <AuthDevice> 
+                    | <NewDevice> 
+                    | <FindUser>;
     private UserToCreate = (String * String * seq of (String * String * String));
-    private ActionsToDo = ([Seconds] * [Actions] * (LoginArgs | LogoutArgs | FindPassArgs | AddPassArgs | RMPassArgs | AuthDeviceArgs | NewDeviceArgs | FindUserArgs));
+    private ActionsToDo = ([Seconds] * [Actions] * (LoginArgs 
+                                                   | LogoutArgs 
+                                                   | FindPassArgs 
+                                                   | AddPassArgs 
+                                                   | RMPassArgs 
+                                                   | AuthDeviceArgs 
+                                                   | NewDeviceArgs 
+                                                   | FindUserArgs));
     
     private LoginArgs = (String * nat);
 
@@ -37,11 +51,16 @@ operations
              for all i in set inds allUsers do
                 (dcl acMa : AccessManager,
                     foo: bool;
-                    foo := users.AddUser(allUsers(i).#1, allUsers(i).#2, devices(1));
+                    foo := users.AddUser(allUsers(i).#1, 
+                                         allUsers(i).#2, 
+                                         devices(1));
                     acMa := users.FindUser(allUsers(i).#1);
                     foo := acMa.Login(allUsers(i).#2, devices(1));
                     for all k in set inds allUsers(i).#3 do
-                        acMa.GetDatabase().AddPassword(new Password(allUsers(i).#3(k).#1,allUsers(i).#3(k).#2,allUsers(i).#3(k).#3));
+                        acMa.GetDatabase().AddPassword(
+                            new Password(allUsers(i).#3(k).#1,
+                                         allUsers(i).#3(k).#2,
+                                         allUsers(i).#3(k).#3));
                     foo := acMa.Logout();
                 ));
 
@@ -93,20 +112,26 @@ operations
         else io.print("Logout failed!\n");
 
     HandleFindPass: FindPassArgs ==> ()
-        HandleFindPass(match) == (dcl database : [Database] := currentUser.GetDatabase(),
-                                    matchedPasses : seq of Password;
+        HandleFindPass(match) == (
+            dcl database : [PasswordDatabase] := currentUser.GetDatabase(),
+            matchedPasses : seq of Password;
             if database <> nil then
                 (matchedPasses := database.FindPasswords(match);
                 if len matchedPasses > 0 then
-                    (io.print(len matchedPasses);io.print(" passwords was found matching \"");io.print(match);io.print("\":\n");
+                    (io.print(len matchedPasses);
+                     io.print(" passwords was found matching \"");
+                     io.print(match);
+                     io.print("\":\n");
                     for all i in set inds matchedPasses do
                         matchedPasses(i).PrintPassword())
-                else (io.print("No passwords was found matching \"");io.print(match);io.print("\".\n");))
-            else io.print("Password could not be found. Database is locked.\n"););
+                else (io.print("No passwords was found matching \"");
+                      io.print(match);
+                      io.print("\".\n");))
+            else io.print("Password could not be found. Database is locked.\n"));
     
     HandleAddPass: AddPassArgs ==> ()
     HandleAddPass(args) ==
-        (dcl database : [Database] := currentUser.GetDatabase(),
+        (dcl database : [PasswordDatabase] := currentUser.GetDatabase(),
         pass : Password;
          if database <> nil then
             def mk_(userName, password, match) = args in
@@ -118,7 +143,7 @@ operations
             
     HandleRMPass: RMPassArgs ==> ()
     HandleRMPass(idx) ==
-        (dcl database : [Database] := currentUser.GetDatabase(),
+        (dcl database : [PasswordDatabase] := currentUser.GetDatabase(),
         pass : Password;
          if database <> nil then
                 (pass := database.GetAllPasswords()(idx);
@@ -135,7 +160,11 @@ operations
 
     HandleAuthDevice: AuthDeviceArgs ==> ()
         HandleAuthDevice(idx) == (currentUser.AuthorizeDevice(devices(idx));
-         io.print("Device # ");io.print(idx);io.print(" was authorized to user: \n");io.print(currentUser.GetUserName());io.print(".\n");
+         io.print("Device # ");
+         io.print(idx);
+         io.print(" was authorized to user: \n");
+         io.print(currentUser.GetUserName());
+         io.print(".\n");
         );
 
     HandleFindUser: FindUserArgs ==> ()
@@ -143,7 +172,9 @@ operations
         if currentUser <> nil then
             (io.print("User: ");io.print(userName);io.print(" was found!\n"))
             else
-            (io.print("Could not find the user ");io.print(userName);io.print(".\n"))
+            (io.print("Could not find the user ");
+             io.print(userName);
+             io.print(".\n"))
         );
 
 

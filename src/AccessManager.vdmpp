@@ -1,7 +1,7 @@
 class AccessManager is subclass of TimeObject
     instance variables
-        user: User;
-        database: Database := new Database();
+        user: UserData;
+        database: PasswordDatabase := new PasswordDatabase();
         acceptedDevices: set of Device_t := {};
         encKey: [EncryptionKey] := nil;
         lastActiveTime: Seconds := 0;
@@ -11,11 +11,12 @@ class AccessManager is subclass of TimeObject
 operations
 
     public AccessManager: String * String * Device_t ==> AccessManager
-    AccessManager(userName, password, dev) == (user := new User(userName, password);
-        Time`GetInstance().Register(self);
-        encKey := user.GetEncryptionKey(new Password(password));
-        AuthorizeDevice(dev);
-        (dcl foo: bool; foo := Logout()));
+    AccessManager(userName, password, dev) == 
+        (user := new UserData(userName, password);
+         Time`GetInstance().Register(self);
+         encKey := user.GetEncryptionKey(new Password(password));
+         AuthorizeDevice(dev);
+         (dcl foo: bool; foo := Logout()));
 
     public Login: String * Device ==> bool
     Login(password, dev) == (
@@ -29,10 +30,15 @@ operations
                 encKey := ek;
                 accessState := <Unlocked> ;
                 return true);
-            io.print("User: ");io.print(GetUserName());io.print(", Login Failed: Wrong passoword.\n");
+            io.print("User: ");io.print(GetUserName());
+            io.print(", Login Failed: Wrong passoword.\n");
                 
-        ) else (io.print("User: ");io.print(GetUserName());io.print(", Login Failed: Device not authorized.\n")))
-        else (io.print("User: ");io.print(GetUserName());io.print(", Login Failed: User already logged in.\n"));
+        ) else (io.print("User: ");
+                io.print(GetUserName());
+                io.print(", Login Failed: Device not authorized.\n")))
+        else (io.print("User: ");
+              io.print(GetUserName());
+              io.print(", Login Failed: User already logged in.\n"));
         return false
     )
     post accessState = <Unlocked> => database.GetLockState() = <Unlocked>;
@@ -42,14 +48,18 @@ operations
             (if accessState = <Unlocked> then 
                 (database.Lock(encKey);encKey:=nil; accessState := <Locked>; 
                 return true); 
-            io.print("User: ");io.print(GetUserName());io.print(", Logout Failed: User already logged out.\n"); 
+             io.print("User: ");
+             io.print(GetUserName());
+             io.print(", Logout Failed: User already logged out.\n"); 
             return false)
         post accessState = <Locked> and database.GetLockState() = <Locked>;
     public TimeTicked: Seconds ==> ()
     TimeTicked(currentTime) == (
         if encKey <> nil and lastActiveTime + timeout <= currentTime then
             (dcl foo: bool; foo := Logout();
-                io.print("User: ");io.print(GetUserName());io.print(", Logged out! User was inactive for too long.\n"));
+             io.print("User: ");
+             io.print(GetUserName());
+             io.print(", Logged out! User was inactive for too long.\n"));
         curTime := currentTime
     )
     post currentTime = curTime and lastActiveTime <= curTime;
@@ -64,7 +74,7 @@ operations
     public pure GetUserName: () ==> String
     GetUserName() == return user.GetUserName();
     
-    public pure GetDatabase: () ==> [Database]
+    public pure GetDatabase: () ==> [PasswordDatabase]
     GetDatabase() ==  (if database.GetLockState() = <Unlocked> then
     return database;
     return nil);

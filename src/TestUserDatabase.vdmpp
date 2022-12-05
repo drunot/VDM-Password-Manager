@@ -22,7 +22,8 @@ traces
             mk_("User5", true),
             mk_("User6", false),
             mk_("User7", false)
-        } in(assert([BoolToNat(database.FindUser(toFind.#1) <> nil)],[BoolToNat(toFind.#2)]))
+        } in(assert([BoolToNat(database.FindUser(toFind.#1) <> nil)],
+                    [BoolToNat(toFind.#2)]))
 
     TestCreateUser:
         let toCreate in set {
@@ -32,6 +33,7 @@ traces
             mk_("User1", "password1", false),
             mk_("User2", "password2", false)
         } in
-            assert([BoolToNat(database.AddUser(toCreate.#1,toCreate.#2,device))],[BoolToNat(toCreate.#3)]);
+            assert([BoolToNat(database.AddUser(toCreate.#1,toCreate.#2,device))],
+                   [BoolToNat(toCreate.#3)]);
 
 end TestUserDatabase

@@ -6,12 +6,29 @@ instance variables
     time: Time := Time`GetInstance();
 operations
     public TestAccessManager: () ==> TestAccessManager
-    TestAccessManager() == (accessManager := new AccessManager("TestUser", passwordText, device);
+    TestAccessManager() == (accessManager := 
+                new AccessManager("TestUser", passwordText, device);
             (dcl foo: bool; foo := accessManager.Login(passwordText, device));
-            accessManager.GetDatabase().AddPassword(new Password("GamerTag", "YouShallNotPassword1", "https://store.steampowered.com"));
-            accessManager.GetDatabase().AddPassword(new Password("BuisnessAccount", "buisness123", "https://bank.com"));
-            accessManager.GetDatabase().AddPassword(new Password("testmail@mail.com", "test123", "https://mail.com"));
-            accessManager.GetDatabase().AddPassword(new Password("PersonalAccount", "birthday", "https://bank.com"));
+            accessManager.GetDatabase().AddPassword(
+                new Password("GamerTag",
+                             "YouShallNotPassword1", 
+                             "https://store.steampowered.com")
+            );
+            accessManager.GetDatabase().AddPassword(
+                new Password("BuisnessAccount", 
+                             "buisness123", 
+                             "https://bank.com")
+            );
+            accessManager.GetDatabase().AddPassword(
+                new Password("testmail@mail.com", 
+                             "test123", 
+                             "https://mail.com")
+            );
+            accessManager.GetDatabase().AddPassword(
+                new Password("PersonalAccount", 
+                             "birthday", 
+                             "https://bank.com")
+            );
             (dcl foo: bool; foo := accessManager.Logout()););
 
     public testTimeout: seq of Seconds * [nat] ==> ()
@@ -19,10 +36,15 @@ operations
         for all i in set inds timeSeq do 
         (time.TickTime(timeSeq(i));
          if timeoutIdx <> nil and i >= timeoutIdx then
-            (dcl foo: bool; foo := assert([BoolToNat(accessManager.GetLoginState() = <Locked>)], [BoolToNat(true)]))
+            (dcl foo: bool; foo := assert(
+                [BoolToNat(accessManager.GetLoginState() = <Locked>)], 
+                [BoolToNat(true)])
+            )
             else 
-            (dcl foo: bool; foo := assert([BoolToNat(accessManager.GetLoginState() = <Unlocked>)], [BoolToNat(true)]));
-            );
+            (dcl foo: bool; foo := assert(
+                [BoolToNat(accessManager.GetLoginState() = <Unlocked>)], 
+                [BoolToNat(true)])
+            ));
 
     public testDoActivity: seq of Seconds * [nat] ==> ()
     testDoActivity(timeSeq, timeoutIdx) == 
@@ -30,24 +52,41 @@ operations
         (time.TickTime(timeSeq(i));
          accessManager.DoActivity();
          if timeoutIdx <> nil and i >= timeoutIdx then
-            (dcl foo: bool; foo := assert([BoolToNat(accessManager.GetLoginState() = <Locked>)], [BoolToNat(true)]))
+            (dcl foo: bool; foo := assert(
+                [BoolToNat(accessManager.GetLoginState() = <Locked>)], 
+                [BoolToNat(true)])
+            )
             else 
-            (dcl foo: bool; foo := assert([BoolToNat(accessManager.GetLoginState() = <Unlocked>)], [BoolToNat(true)]));
-            );
+            (dcl foo: bool; foo := assert(
+                [BoolToNat(accessManager.GetLoginState() = <Unlocked>)], 
+                [BoolToNat(true)])
+            ));
 traces
     TestLogin:
         let test in set {mk_(passwordText, true),
                          mk_("OtherPassword", false),
                          mk_("ThirdPassword", false)} in
-        assert([BoolToNat(accessManager.Login(test.#1, device))],[BoolToNat(test.#2)])
+        assert(
+            [BoolToNat(accessManager.Login(test.#1, device))],
+            [BoolToNat(test.#2)]
+        )
 
     TestLoginTwice:
-        (assert([BoolToNat(accessManager.Login(passwordText, device))],[BoolToNat(true)]);
-        assert([BoolToNat(accessManager.Login(passwordText, device))],[BoolToNat(false)]));
+        (assert(
+            [BoolToNat(accessManager.Login(passwordText, device))],
+            [BoolToNat(true)]
+        );
+        assert(
+            [BoolToNat(accessManager.Login(passwordText, device))],
+            [BoolToNat(false)]
+        ));
 
     TestLogout:
         (assert([BoolToNat(accessManager.Logout())],[BoolToNat(false)]);
-         assert([BoolToNat(accessManager.Login(passwordText, device))],[BoolToNat(true)]);
+         assert(
+            [BoolToNat(accessManager.Login(passwordText, device))],
+            [BoolToNat(true)]
+        );
          assert([BoolToNat(accessManager.Logout())],[BoolToNat(true)]);
         )
 
@@ -56,12 +95,21 @@ traces
             mk_(device, true),
             mk_(new Device(), false)
         } in
-         (assert([BoolToNat(accessManager.Login(passwordText, dev.#1))],[BoolToNat(dev.#2)]);
+         (assert(
+            [BoolToNat(accessManager.Login(passwordText, dev.#1))],
+            [BoolToNat(dev.#2)]
+          );
           accessManager.Logout();
           accessManager.AuthorizeDevice(dev.#1);
-          assert([BoolToNat(accessManager.Login(passwordText, dev.#1))],[BoolToNat(true)]);
+          assert(
+            [BoolToNat(accessManager.Login(passwordText, dev.#1))],
+            [BoolToNat(true)]
+          );
           accessManager.Logout();
-          assert([BoolToNat(accessManager.Login(passwordText, device))],[BoolToNat(true)]);)
+          assert(
+            [BoolToNat(accessManager.Login(passwordText, device))],
+            [BoolToNat(true)]
+          ));
 
     TestLogoutOnTimeout:
         let intervals in set {
@@ -85,7 +133,10 @@ traces
              testDoActivity(intervals.#1, intervals.#2))
 
     TestGetUsername:
-        assert([BoolToNat(accessManager.GetUserName() = "TestUser")], [BoolToNat(true)])
+        assert(
+            [BoolToNat(accessManager.GetUserName() = "TestUser")], 
+            [BoolToNat(true)]
+        );
 
     TestGetDatabase:
         (assert([BoolToNat(accessManager.GetDatabase() = nil)], [BoolToNat(true)]);

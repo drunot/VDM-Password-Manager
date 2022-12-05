@@ -4,7 +4,9 @@ Bellow is given the the requirements for the system. Definitions for the require
     \item The user or users er the actors interacting with the Password Manager. (Customers)
     \item The database maintainer is the actors owning and maintaining the database and password manager. (Owners)
     \item In \ref{bul:req:inactive} the system is the user's system, on which the password manager client is running.
+    \item Two users cannot have the same password.
 \end{itemize}
+
 
 
 

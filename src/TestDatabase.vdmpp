@@ -1,32 +1,63 @@
-class TestDatabase is subclass of TEST
+class TestPasswordDatabase is subclass of TEST
 instance variables
-    database: Database := new Database();
+    database: PasswordDatabase := new PasswordDatabase();
 operations
-    TestDatabase: () ==> TestDatabase
-    TestDatabase() == (
-            database.AddPassword(new Password("GamerTag", "YouShallNotPassword1", "https://store.steampowered.com"));
-            database.AddPassword(new Password("BuisnessAccount", "buisness123", "https://bank.com"));
-            database.AddPassword(new Password("testmail@mail.com", "test123", "https://mail.com"));
-            database.AddPassword(new Password("PersonalAccount", "birthday", "https://bank.com"))
-        )
+    TestPasswordDatabase: () ==> TestPasswordDatabase
+    TestPasswordDatabase() == (
+            database.AddPassword(
+                new Password("GamerTag", 
+                             "YouShallNotPassword1", 
+                             "https://store.steampowered.com")
+                );
+            database.AddPassword(
+                new Password("BuisnessAccount",
+                             "buisness123", 
+                             "https://bank.com")
+                );
+            database.AddPassword(
+                new Password("testmail@mail.com", 
+                             "test123", 
+                             "https://mail.com")
+                );
+            database.AddPassword(
+                new Password("PersonalAccount", 
+                             "birthday", 
+                             "https://bank.com")
+                )
+        );
 traces
     TestLockUnlock:
         (
-            assert([BoolToNat(database.GetLockState() = <Unlocked>)], [BoolToNat(true)]);
+            assert(
+                [BoolToNat(database.GetLockState() = <Unlocked>)], 
+                [BoolToNat(true)]
+            );
             database.Lock(new EncryptionKey(1, new Password("SomePassword")));
-            assert([BoolToNat(database.GetLockState() = <Locked>)], [BoolToNat(true)]);
+            assert(
+                [BoolToNat(database.GetLockState() = <Locked>)], 
+                [BoolToNat(true)]
+            );
             database.Unlock(new EncryptionKey(1, new Password("SomePassword")));
-            assert([BoolToNat(database.GetLockState() = <Unlocked>)], [BoolToNat(true)]);
+            assert(
+                [BoolToNat(database.GetLockState() = <Unlocked>)], 
+                [BoolToNat(true)]
+            );
         )
 
     TestGetDatabaseAndAddPassword:
         (
             assert([len database.GetAllPasswords()], [4]);
-            database.AddPassword(new Password("PersonalAccount", "birthday", "https://bank.com"));
+            database.AddPassword(
+                new Password("PersonalAccount", "birthday", "https://bank.com")
+            );
             assert([len database.GetAllPasswords()], [5]);
-            database.AddPassword(new Password("SomeAccount", "password", "app:string:to:match"));
+            database.AddPassword(
+                new Password("SomeAccount", "password", "app:string:to:match")
+            );
             assert([len database.GetAllPasswords()], [6]);
-            database.AddPassword(new Password("passWithoutMatchString"));
+            database.AddPassword(
+                new Password("passWithoutMatchString")
+            );
             assert([len database.GetAllPasswords()], [6])
         )
 
@@ -48,5 +79,8 @@ traces
             mk_("https://store.steampowered.com", 1),
             mk_("https://pageNotFound.com", 0)
         } in
-            assert([BoolToNat((len database.FindPasswords(data.#1)) = data.#2)], [BoolToNat(true)])
-end TestDatabase
+            assert(
+                [BoolToNat((len database.FindPasswords(data.#1)) = data.#2)],
+                [BoolToNat(true)]
+            )
+end TestPasswordDatabase
