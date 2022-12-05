@@ -107,7 +107,7 @@ def ReadVDMPPFile(path: str, dist: str = "./"):
             file.write(toWrite)
 
 
-BASE_LOCATION = "latex/prj"
+BASE_LOCATION = "../latex/prj"
 
 APP_LOCATION = "coverage"
 
@@ -132,7 +132,7 @@ if __name__ == "__main__":
         file.write(
             t.render(
                 apps=[
-                    f"{'/'.join(LOCATION.split('/')[1:])}{os.path.splitext(os.path.basename(x))[0]}"
+                    f"{'/'.join(LOCATION.split('/')[2:])}{os.path.splitext(os.path.basename(x))[0]}"
                     for x in glob.glob("*.vdmpp")
                 ]
             )

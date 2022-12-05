@@ -1,0 +1,1 @@
+pdflatex -shell-escape -draftmode main.tex; biber main ;pdflatex -shell-escape -draftmode main.tex; biber main; pdflatex -shell-escape main.tex

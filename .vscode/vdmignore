@@ -1,0 +1,13 @@
+latex\**
+latex\frontpage.sty
+latex\main.aux
+latex\main.bcf
+latex\main.fdb_latexmk
+latex\main.fls
+latex\main.log
+latex\main.out
+latex\main.pdf
+latex\main.run.xml
+latex\main.toc
+latex\preamble.sty
+latex\prj\appendix.aux

@@ -1,4 +1,4 @@
-/.generated
+/src/.generated
 *.run.xml
 *.out
 *.log
