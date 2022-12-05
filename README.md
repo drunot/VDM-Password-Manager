@@ -4,7 +4,7 @@ This project implements a VDM++ model of a password manager. The model can be fo
 
 ## Building the report
 
-To generate the files for the appendix run the command bellow from root of the repository. This uses the coverage files generate by the VDM VSCode extension. It looks for them in `src/.generated/coverage` and not in `.generated/coverage/src` therefore run VS Code from `src` when using the model.
+To generate the files for the appendix run the command bellow from root of the repository. (This uses the coverage files generate by the VDM VSCode extension. It looks for them in `src/.generated/coverage` and not in `.generated/coverage/src` therefore run VS Code from `src` when using the model.)
 
 ```PowerShell
 $ python .\Helpers\generateTable.py
