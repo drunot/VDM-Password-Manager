@@ -1,9 +1,0 @@
-\chapter{Introduction}
-
-In this report a VDM++ model of a Password Manager is described. The model is made as the mini-project part of the course Modeling of Critical systems carried out by Aarhus University.
-
-The purpose of the report is to show an example of how a VDM++ model could be implemented and tested in this case in form of a Password Manager. Models are useful to test critical parts of a system. For Password Managers to be effective it is important to ensure that they are secure, and therefore creates a good case for a VDM++ model. Since the security aspects are in focus other aspects of the system is not covered by the model such as network and concurrent access to the database.
-
-This report has an introduction of what the report is about, a system description and what requirements the system should uphold. The the approach to the model and the model itself is described before the results from the model is discussed. The model source code and coverage can be seen in the appendix. Alternately the sources can be found at \href{https://github.com/drunot/VDM-Password-Manager}{github.com/drunot/VDM-Password-Manager}.
-
-The system description uses the architecture of the system. This was developed after the requirements was specified but to give an introduction to the system before presenting the requirements, this chapter is presented first.

@@ -11,3 +11,4 @@
 *.toc
 /latex/prj/coverage
 /latex/main.pdf
+*.tex.vdmpp
