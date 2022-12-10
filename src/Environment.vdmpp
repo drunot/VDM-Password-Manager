@@ -1,4 +1,4 @@
-class Environment is subclass of TEST
+class Environment is subclass of GLOBAL
 types 
     private Actions = <Login> 
                     | <Logout> 

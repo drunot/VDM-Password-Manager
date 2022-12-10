@@ -1,0 +1,169 @@
+\chapter{Testing}
+
+To test each class unit tests are made using the combinatorial testing framework of VDM++. An example of how the tests are conducted for the class {\ttfamily UserDatabase} can be seen in \cref{lst:test:traces}, where the test class' traces are shown. While the tests was run some mistakes was found that was corrected so all tests are passed.
+
+\begin{listing}[H]
+    \begin{vdm_al}
+TestFindUser:
+        let toFind in set {
+            mk_("User1", true),
+            mk_("User2", true),
+            mk_("User3", true),
+            mk_("User4", true),
+            mk_("User5", true),
+            mk_("User6", false),
+            mk_("User7", false)
+        } in(assert([BoolToNat(database.FindUser(toFind.#1) <> nil)],
+                    [BoolToNat(toFind.#2)]))
+
+    TestCreateUser:
+        let toCreate in set {
+            mk_("User6", "password6", true),
+            mk_("User7", "password7", true),
+            mk_("User8", "password8", true),
+            mk_("User1", "password1", false),
+            mk_("User2", "password2", false)
+        } in
+            assert([BoolToNat(database.AddUser(toCreate.#1,toCreate.#2,device))],
+                   [BoolToNat(toCreate.#3)]);
+    \end{vdm_al}
+    \caption{The {\ttfamily UserDatabase} tests.}
+    \label{lst:test:traces}
+\end{listing}
+
+To test the whole runtime of the system the environment is set up. From the environment scenarios can be run and tested. An example of a scenario is shown in \cref{lst:test:scenario}.
+
+\begin{listing}[H]
+    \begin{vdm_al}
+mk_(
+    [
+        mk_("alanKeyVault", "somePassword", [
+            mk_("alan", "alan190286", "https://somesite.com"),
+            mk_("alansUser", "alan190286!", "https://someOthersite.com"),
+            mk_("alanPrivate", "superGoodPassword", "https://bank.com"),
+            mk_("alansBusiness", "anotherGoodPassword", "https://bank.com")
+        ])
+    ],
+    [
+        mk_(nil, <FindUser>, "alanKeyVault"),
+        mk_(nil, <Login>, mk_("somePassword", 1)),
+        mk_(nil, <NewDevice>, nil),
+        mk_(145, <Logout>, nil),
+        mk_(nil, <FindPass>, "https://bank.com"),
+        mk_(nil, <RMPass>, 4),
+        mk_(178, <Login>, mk_("somePassword", 2)),
+        mk_(nil, <AuthDevice>, 2),
+        mk_(nil, <Login>, mk_("somePassword", 2)),
+        mk_(nil, <FindPass>, "https://bank.com"),
+        mk_(nil, <RMPass>, 4),
+        mk_(nil, <AddPass>, mk_("alansOtherBusiness", 
+                                "ThisIsAGoodPasswordAsWell", 
+                                "https://bank.com")),
+        mk_(nil, <FindPass>, "https://bank.com"),
+        mk_(311, nil, nil)
+    ]
+)
+    \end{vdm_al}
+    \caption{Example {\ttfamily scenario.txt}.}
+    \label{lst:test:scenario}
+\end{listing}
+
+To make sure that the tests cover the code base coverage data is generated with the VS Code VDM extension. Since the extension can only visualize the coverage and not generate coverage tables a helper python script is used to convert the coverage data to coverage tables. The coverage for each file can be seen in the appendix.
+
+All the tests are passed and when running the example scenario the output is as shown in \cref{lst:test:scenario_output} and from it, it can be seen that all actions do as expected. Further more it can be seen that the coverage is almost complete in the appendix.
+
+\begin{longlisting}
+    \begin{vdm_al}
+*
+* VDMJ VDM_PP Interpreter
+*
+
+Default class is World
+Initialized in ... 0.023 secs.
+
+-----------------
+User: alanKeyVault was found!
+-----------------
+
+-----------------
+Login success!
+-----------------
+
+-----------------
+Device # 2 was added.
+-----------------
+
+-----------------
+Time passed: 2 minutes 25 seconds
+Logout success!
+-----------------
+
+-----------------
+Password could not be found. Database is locked.
+-----------------
+
+-----------------
+Password could not be added. Database is locked.
+-----------------
+
+-----------------
+Time passed: 2 minutes 58 seconds
+User: alanKeyVault, Login Failed: Device not authorized.
+Login failed!
+-----------------
+
+-----------------
+Device # 2 was authorized to user:
+alanKeyVault.
+-----------------
+
+-----------------
+Login success!
+-----------------
+
+-----------------
+2 passwords was found matching "https://bank.com":
+Password to: https://bank.com
+User Name: alanPrivate
+Password: superGoodPassword
+Password to: https://bank.com
+User Name: alansBusiness
+Password: anotherGoodPassword
+-----------------
+
+-----------------
+Following password was removed:
+Password to: https://bank.com
+User Name: alansBusiness
+Password: anotherGoodPassword
+-----------------
+
+-----------------
+Following password was added:
+Password to: https://bank.com
+User Name: alansOtherBusiness
+Password: ThisIsAGoodPasswordAsWell
+-----------------
+
+-----------------
+2 passwords was found matching "https://bank.com":
+Password to: https://bank.com
+User Name: alanPrivate
+Password: superGoodPassword
+Password to: https://bank.com
+User Name: alansOtherBusiness
+Password: ThisIsAGoodPasswordAsWell
+-----------------
+
+-----------------
+User: alanKeyVault, Logged out! User was inactive for too long.
+Time passed: 5 minutes 11 seconds
+-----------------
+new World().Run() = ()
+
+Session disconnected.
+
+    \end{vdm_al}
+    \caption{Example {\ttfamily scenario.txt} terminal output.}
+    \label{lst:test:scenario_output}
+\end{longlisting}

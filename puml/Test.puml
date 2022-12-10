@@ -1,0 +1,185 @@
+@startuml Test
+
+hide empty members
+skinparam Shadowing false
+skinparam linetype ortho
+skinparam defaultTextAlignment center
+
+class GLOBAL
+{
+	+ String : seq of char <<type>>
+	+ Seconds : nat <<type>>
+	+ Device_t : Device <<type>>
+	+ Password_t : Password <<type>>
+	+ EncryptionKey_t : EncryptionKey <<type>>
+	+ OptEncryptionKey : [EncryptionKey_t] <<type>>
+	+ LockState : <Locked> | <Unlocked> <<type>>
+	+ io : IO
+}
+
+class TEST
+{
+    # BoolToNat: map bool to int
+    # assert(data: seq1 of nat, expected: seq1 of nat): bool
+}
+
+class TestAccessManager {
+    + passwordText: String
+    + device: Device_t
+    + accessManager: AccessManager
+    - time: Time
+    + testTimeout(timeSeq: seq of Seconds, timeoutIdx: [nat]): void
+    + testDoActivity(timeSeq: seq of Seconds, timeoutIdx: [nat]): void
+    + TestLogin <<trace>>
+    + TestLoginTwice <<trace>>
+    + TestLogout <<trace>>
+    + TestAuthorizedDevices <<trace>>
+    + TestLogoutOnTimeout <<trace>>
+    + TestDoActivity <<trace>>
+    + TestGetUsername <<trace>>
+    + TestGetDatabase <<trace>>
+}
+
+class AccessManager {
+    - user: UserData
+    - database: PasswordDatabase
+    - acceptedDevices: set of Device_t
+    - encKey: [EncryptionKey]
+    - lastActiveTime: Seconds
+    - curTime: Seconds
+    - accessState: LockState
+    - timeout: Seconds
+}
+
+class TestPasswordDatabase {
+    - database: PasswordDatabase
+    - TestPasswordDatabase() : TestPasswordDatabase
+    + TestLockUnlock <<trace>>
+    + TestGetDatabaseAndAddPassword <<trace>>
+    + TestGetDatabaseAndRemovePassword <<trace>>
+    + TestFindPassowrds <<trace>>
+}
+
+class PasswordDatabase {
+    - passwords: seq of Password
+    - eqState: LockState
+    + Unlock(encKey: EncryptionKey_t): void
+    + Lock(encKey: EncryptionKey_t): void
+    + GetLockState(): LockState
+    + AddPassword(password: Password): void
+    + GetAllPasswords(): seq of Password
+    + FindPasswords(match: String): seq of Password
+    + RemovePassword(idx: nat): void
+}
+
+class TestPassword {
+    - password: Password
+    + TestPasswordCreation <<trace>>
+    + TestEncryptDecrypt <<trace>>
+}
+
+class Password {
+    + State = <Encrypted> | <PlainText> <<type>>
+    - password: String
+    - enqState: State
+    - enqKey: OptEncryptionKey
+    - userName: [String]
+    - matchData: [String]
+    + Password(keyPhrase: String): Password
+    + Password(keyPhrase: String, match: String): Password
+    + Password(user: String, keyPhrase: String, match: String): Password
+    + GetEncryptionState(): State
+    + PasswordCompaire(cmp1: Password, cmp2: Password): bool
+    + GetPasswordToken(): token
+    + Encrypt(key: EncryptionKey_t): void
+    + Decrypt(key: EncryptionKey_t): void
+    + GetUserName(): [String]
+    + GetMatchString(): [String]
+    + PrintPassword(): void
+}
+
+class TimeObject {
+    + TimeTicked(currentTime: Seconds): void
+}
+
+class TestTimeObject {
+    - currentTime: Seconds
+    - expireTime: Seconds
+    - timeExired: bool
+    + TestTimeObject(time: Time, seconds: Seconds): TestTimeObject
+    + TimeTicked(curTime: Seconds): void
+    + GetExpired(): bool
+}
+
+class TestTime {
+    - time: Time
+    + TestTickTime <<trace>>
+    + TestTimeObject <<trace>>
+}
+
+class Time {
+    - currentTime: Seconds
+    - updateObjects: seq of TimeObject
+    - timeInstance : [Time]
+    - Time(): Time
+    + GetInstance(): Time
+    + TickTime(amout: Seconds)
+    + Register(obj: TimeObject)
+    + GetCurrentTime(): Seconds
+}
+
+class TestUserData {
+    - userPassword: String
+    - user1: UserData
+    - user2: UserData
+    + TestIsPasswordCorrect <<trace>>
+    + TestGetUserName <<trace>>
+    + TestGetEncryptionKey <<trace>>
+    + TestChangePassword <<trace>>
+}
+
+class UserData {
+    - userName: String
+    - password: Password_t
+    - userId: int
+    - internalEncryptionKey: EncryptionKey
+    - idCounter: int
+    - allUsers: set of UserData
+    + UserData(userNme: String, passwd: String): UserData
+    + GetEncryptionKey(passwd: Password_t): EncryptionKey_t
+    + IsCorrectPassword(pass: Password_t): bool
+    + GetUserName(): String
+    + ChangePassword(): String
+}
+
+class TestUserDatabase {
+    - database: UserDatabase
+    - device: Device_t
+    - TestUserDatabase(): TestUserDatabase
+    + TestFindUser <<trace>>
+    + TestCreateUser <<trace>>
+}
+
+class UserDatabase {
+    - users: seq of AccessManager
+    + FindUser(userName: String): [AccessManager]
+    + AddUser(userName: String, password: String, device: Device_t): bool
+}
+
+GLOBAL <|--down-- TEST
+TEST <|--down-- TestAccessManager
+TestAccessManager o--down-- AccessManager
+TEST <|--down-- TestPasswordDatabase
+TestPasswordDatabase o--down-- PasswordDatabase
+TEST <|--down-- TestPassword
+TestPassword o--down-- Password
+GLOBAL <|--down-- TimeObject
+TimeObject <|--down-- TestTimeObject
+Time o--down-- TimeObject
+TEST <|--down-- TestTime 
+TestTime o--down-- Time
+TEST <|--down-- TestUserData 
+TestUserData o--down-- UserData
+TEST <|--down-- TestUserDatabase 
+TestUserDatabase o--down-- UserDatabase
+@enduml

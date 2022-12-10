@@ -1,0 +1,43 @@
+\chapter{Modelling Approach}
+
+In order to model the system sufficiently there are som decisions made on how
+to model the system, and what to abstract away from. This chapter of the report
+describes which decisions and the approach used in this model.
+
+\section{Abstractions}
+When it comes to abstracting things out of the model in this case it has mostly
+been the underlying technologies used for e.g. encryption and hashing that has
+been abstracted away from. Here instead unions of quote types is used to
+construct flags that indicate what state the given data is supposed to be in.
+This also makes it easier to validate that the model is doing what it should.
+This is because it can be hard to check a model against encrypted or hashed
+data. The abstractions used in this model is shown in
+\cref{tbl:model:abstract}.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|L{0.15\textwidth}|L{0.25\textwidth}|L{0.45\textwidth}|}\hline
+        Class            & Abstraction    & Description                                                                                                                                                                                                                       \\ \hline
+        Password         & Encryption     & {\ttfamily enqState} is used to keep track of whether or not the password is encrypted or not, while the password is always kept in plain text in the password member.                                                            \\ \hline
+        PasswordDatabase & Encryption     & While the not only the passwords should be encrypted the whole database should so a third party cannot se how many passwords the user have. This is keep track of in the member {\ttfamily eqState}.                              \\\hline
+        Device           & Identification & Right now the devices are just a having a token created on a running counter. To really identify a device MAC addresses, IP addresses, Cookies or other methods should probably be used to identify the device in the real world. \\\hline
+        User             & Hashing        & The user password is stored in clear text even though it should be hashed to maintain security. Since this will not change anything in regards to how the model is working, this is abstracted away.                              \\\hline
+    \end{tabular}
+    \caption{The abstractions used in this model.}
+    \label{tbl:model:abstract}
+\end{table}
+
+\section{Modelling Decisions}
+Since this model revolves around checking that users can only access their data
+there is a lot of things that is not included in this model either to keep the
+scope clear like deciding not to model concurrency or because it is not
+relevant to how the model works, like how devices should be authenticated
+whether it is 2 factor authentication or something else.
+
+This model does not take into account that the system probably will be a
+distributed concurrent system and therefore, it might be necessary for the user
+to have there own password database locally as well as online.
+
+All user experiences in the system is not relevant for the model. This could be
+things like auto filling passwords, how device authentication should happen, or
+a user interface.
