@@ -115,10 +115,10 @@ LOCATION = f"{BASE_LOCATION}/{APP_LOCATION}/"
 
 APPENDIX = """
 %TC:ignore
-\chapter{Appedix}
+\\chapter{Appedix}
 {% for app in apps %}
-\input{ {{app}} }
-\clearpage{% endfor %}
+\\input{ {{app}} }
+\\clearpage{% endfor %}
 %TC:endignore
 """
 
